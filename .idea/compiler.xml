@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="ru.sviridov.lesson6" />
+        <module name="java-may-maven" />
       </profile>
     </annotationProcessing>
   </component>
