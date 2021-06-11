@@ -13,18 +13,18 @@ public class WeatherController implements IWeatherController {
 
         switch (command) {
             case 1:
-                getCurrentWeather();
+                getCurrentWeather(Period.NOW);
                 break;
             case 2:
-                System.out.println("НЕ РЕАЛИЗОВАНО!");
-                System.exit(1);
+                getCurrentWeather(Period.FIVE_DAYS);
+                break;
             default:
                 System.out.println("НЕТ ТАКОЙ КОМАНДЫ!");
                 System.exit(1);
         }
     }
 
-    private void getCurrentWeather() {
-        weatherProvider.getWeather(Period.NOW);
+    private void getCurrentWeather(Period period) {
+        weatherProvider.getWeather(period);
     }
 }

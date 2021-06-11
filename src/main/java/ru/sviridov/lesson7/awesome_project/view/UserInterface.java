@@ -16,13 +16,10 @@ public class UserInterface implements IUserInterface {
         while (true) {
             System.out.println("Введи название города или exit для выхода");
             String userInput = scanner.nextLine();
-
             checkIsExit(userInput);
             GlobalState.getInstance().setSelectedCity(userInput);
-
             System.out.println("Введите команду: \n1. - погода на 1 день\n2. - погода на 5 дней");
             String command = scanner.nextLine();
-
             try {
                 validateUserInput(command);
             } catch (Exception e) {
@@ -30,10 +27,8 @@ public class UserInterface implements IUserInterface {
                 System.out.println("Неверный ввод");
                 continue;
             }
-
             controller.onUserInput(Integer.parseInt(command));
         }
-
     }
 
     private void checkIsExit(String input) {
