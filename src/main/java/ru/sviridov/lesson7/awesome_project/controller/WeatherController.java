@@ -1,12 +1,12 @@
 package ru.sviridov.lesson7.awesome_project.controller;
 
-import ru.sviridov.lesson7.awesome_project.model.AccuWeatherProvider;
-import ru.sviridov.lesson7.awesome_project.model.IWeatherProvider;
-import ru.sviridov.lesson7.awesome_project.model.Period;
+import ru.sviridov.lesson7.awesome_project.model.*;
+
+import java.sql.SQLException;
 
 public class WeatherController implements IWeatherController {
 
-    private IWeatherProvider weatherProvider = new AccuWeatherProvider();
+    private IWeatherRepository weatherRepository = new WeatherRepository();
 
     @Override
     public void onUserInput(int command) {
@@ -18,6 +18,9 @@ public class WeatherController implements IWeatherController {
             case 2:
                 getCurrentWeather(Period.FIVE_DAYS);
                 break;
+            case 3:
+                getAllFromDb();
+                break;
             default:
                 System.out.println("НЕТ ТАКОЙ КОМАНДЫ!");
                 System.exit(1);
@@ -25,6 +28,14 @@ public class WeatherController implements IWeatherController {
     }
 
     private void getCurrentWeather(Period period) {
-        weatherProvider.getWeather(period);
+        weatherRepository.fetchWeatherFromApi(period);
+    }
+
+    private void getAllFromDb() {
+        try {
+            weatherRepository.readWeatherFromDb();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }

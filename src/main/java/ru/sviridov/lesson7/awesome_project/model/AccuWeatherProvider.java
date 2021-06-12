@@ -8,8 +8,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import ru.sviridov.lesson7.awesome_project.GlobalState;
+import ru.sviridov.lesson7.awesome_project.entity.WeatherObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AccuWeatherProvider implements IWeatherProvider {
 
@@ -27,7 +30,8 @@ public class AccuWeatherProvider implements IWeatherProvider {
  */
 
     @Override
-    public void getWeather(Period period) {
+    public List<WeatherObject> getWeather(Period period) {
+        List<WeatherObject> weatherObjectArrayList;
         String key = detectCityKeyByName();
         HttpUrl url = getHttpUrl(key, period.getValue());
         Request request = getRequest(url);
@@ -37,10 +41,11 @@ public class AccuWeatherProvider implements IWeatherProvider {
                 throw new RuntimeException("Сервер ответил " + response.code());
             }
             String responseBody = response.body().string();
-            getInfo(responseBody);
+            weatherObjectArrayList = getInfo(responseBody);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return weatherObjectArrayList;
     }
 
     private String detectCityKeyByName() {
@@ -105,19 +110,24 @@ public class AccuWeatherProvider implements IWeatherProvider {
                 .build();
     }
 
-    private void getInfo(String responseBody) throws JsonProcessingException {
+    private List<WeatherObject> getInfo(String responseBody) throws JsonProcessingException {
+        List<WeatherObject> weatherObjectArrayList = new ArrayList<>();
         if (objectMapper.readTree(responseBody).size() > 0) {
             String cityName = GlobalState.getInstance().getSelectedCity();
             for (int i = 0; i < objectMapper.readTree(responseBody).at("/DailyForecasts").size(); i++) {
                 String date = objectMapper.readTree(responseBody).at("/DailyForecasts").get(i).at("/Date").asText().split("T")[0];
                 String weather_text_day = objectMapper.readTree(responseBody).at("/DailyForecasts").get(i).at("/Day/IconPhrase").asText();
                 String weather_text_night = objectMapper.readTree(responseBody).at("/DailyForecasts").get(i).at("/Night/IconPhrase").asText();
-                String temperatureMin = Integer.toString((objectMapper.readTree(responseBody).at("/DailyForecasts").get(i).at("/Temperature/Minimum/Value").asInt() - 32) * 5 / 9);
-                String temperatureMax = Integer.toString((objectMapper.readTree(responseBody).at("/DailyForecasts").get(i).at("/Temperature/Maximum/Value").asInt() - 32) * 5 / 9);
-                System.out.printf("В городе %s на дату %s, днем ожидается: %s, ночью ожидается: %s, тепература от %s до %s грудусов Цельсия\n", cityName, date, weather_text_day, weather_text_night, temperatureMin, temperatureMax);
+                double temperatureMin = ((objectMapper.readTree(responseBody).at("/DailyForecasts").get(i).at("/Temperature/Minimum/Value").asInt() - 32) * 5 / 9);
+                double temperatureMax = ((objectMapper.readTree(responseBody).at("/DailyForecasts").get(i).at("/Temperature/Maximum/Value").asInt() - 32) * 5 / 9);
+                System.out.printf("В городе %s на дату %s, днем ожидается: %s, ночью ожидается: %s, тепература от %s до %s грудусов Цельсия\n", cityName, date,
+                        weather_text_day, weather_text_night, temperatureMin, temperatureMax);
+                weatherObjectArrayList.add(new WeatherObject(cityName, date, weather_text_day, weather_text_night, temperatureMin, temperatureMax));
             }
         }
+        return weatherObjectArrayList;
     }
+
 /*
 Пример вывода по городу Санкт-Петербург
 Найден город Saint Petersburg в стране Russia, код - 295212
